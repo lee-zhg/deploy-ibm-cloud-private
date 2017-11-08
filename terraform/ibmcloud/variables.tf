@@ -15,12 +15,17 @@ variable "key_file" {
 ##### Common VM specifications ######
 variable "datacenter" { default = "dal10" }
 variable "domain" { default = "icp.demo" }
+variable "public_vlan_id" { default = ""}
+variable "private_vlan_id" { default = ""}
 
 ##### ICP version #####
-variable "icp_version" { default = "ibmcom/icp-inception:2.1.0-beta-3" }
+variable "icp_version" { default = "ibmcom/icp-inception:2.1.0" }
 
 # Name of the ICP installation, will be used as basename for VMs
 variable "instance_name" { default = "myicp" }
+
+# Password to use for default admin user
+variable "default_admin_password" { default = "admin" }
 
 ##### ICP Instance details ######
 variable "master" {
@@ -28,7 +33,7 @@ variable "master" {
   default = {
     nodes       = "1"
     cpu_cores   = "2"
-    disk_size   = "25" // GB
+    disk_size   = "100" // GB
     local_disk  = false
     memory      = "8192"
     network_speed= "1000"
@@ -41,11 +46,11 @@ variable "proxy" {
   type = "map"
   default = {
     nodes       = "1"
-    cpu_cores   = "2"
+    cpu_cores   = "1"
     disk_size   = "25" // GB
     local_disk  = true
-    memory      = "8192"
-    network_speed= "1000"
+    memory      = "2048"
+    network_speed= "100"
     private_network_only=false
     hourly_billing=true
   }
@@ -58,8 +63,8 @@ variable "worker" {
     cpu_cores   = "2"
     disk_size   = "25" // GB
     local_disk  = true
-    memory      = "8192"
-    network_speed= "1000"
+    memory      = "4096"
+    network_speed= "100"
     private_network_only=false
     hourly_billing=true
   }
