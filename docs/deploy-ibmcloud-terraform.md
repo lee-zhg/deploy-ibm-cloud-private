@@ -1,12 +1,13 @@
-## Deploy IBM Cloud Private beta to IBM Cloud (softlayer) with Terraform
+# Deploy IBM Cloud Private to IBM Cloud with Terraform
 
-### Requirements
+## Requirements
 
 * [Terraform](https://www.terraform.io/downloads.html)
-* [Softlayer module for Terraform](https://github.com/softlayer/terraform-provider-softlayer#install)
+* [IBM Cloud provider for Terraform](https://ibm-cloud.github.io/tf-ibm-docs/#using-terraform-with-the-ibm-cloud-provider)
+* [Softlayer CLI](https://softlayer-api-python-client.readthedocs.io/en/latest/install/)
 * [Softlayer API Key](https://knowledgelayer.softlayer.com/procedure/retrieve-your-api-key)
 
-### Deploy
+## Deploy
 
 You will need to collect some information from the Softlayer admin page before you can proceeed. Here's how to get those details:
 
@@ -53,30 +54,29 @@ slcli sshkey add -f shortname_ssh_key.pub shortname_ssh_key
 
 variable name | data
 --------------|-------------
-sl_username |  API Username
-sl_api_key | Authentication key
+ibm_sl_username |  API Username
+ibm_sl_api_key | Authentication key
 key_name  | shortname_ssh_key
 key_file | full path to the private key file
 datacenter  | data center ID, e.g. wdc01
 public_vlan_id | 7-digit public VLAN ID
 private_vlan_id | 7-digit public VLAN ID
 
-* Save your changes to variables.tf and proceed.
+* By default, variables.tf sets the ICP version to 3.1.1, adjust this if desired. Save your changes to variables.tf and proceed.
 
 Initialize Terraform:
 
 ```bash
 $ cd terraform/ibmcloud
 $ terraform init
-Downloading modules...
-Get: git::https://github.com/ibm-cloud-architecture/terraform-module-icp-deploy.git
+Initializing modules...
+- module.icpprovision
+  Getting source "github.com/ibm-cloud-architecture/terraform-module-icp-deploy?ref=2.3.7"
 
 Initializing provider plugins...
 - Checking for available provider plugins on https://releases.hashicorp.com...
 - Downloading plugin for provider "null" (1.0.0)...
-- Downloading plugin for provider "tls" (1.0.0)...
-
-Initializing provider plugins...
+- Downloading plugin for provider "tls" (1.2.0)...
 
 The following providers do not have any version constraints in configuration,
 so the latest version was installed.
@@ -86,8 +86,9 @@ changes, it is recommended to add version = "..." constraints to the
 corresponding provider blocks in configuration, with the constraint strings
 suggested below.
 
+* provider.ibm: version = "~> 0.14"
 * provider.null: version = "~> 1.0"
-* provider.tls: version = "~> 1.0"
+* provider.tls: version = "~> 1.2"
 
 Terraform has been successfully initialized!
 ```
@@ -95,23 +96,38 @@ Terraform has been successfully initialized!
 _Note: If you see the following error `Error retrieving SSH key: SOAP-ENV:Client: Bad Request (HTTP 200)` comment out the line
 beginning with `endpoint_url` from `~/.softlayer`._
 
-Next start the ICP deploy / install:
+Next start the ICP deploy / install (answer 'yes' when prompted):
 
 ```
 $ terraform apply -parallelism=2
 data.softlayer_ssh_key.public_key: Refreshing state...
-softlayer_virtual_guest.icpmaster: Creating...
+
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
 ...
 ...
-module.icpprovision.null_resource.icp-boot (remote-exec): PLAY RECAP *********************************************************************
-module.icpprovision.null_resource.icp-boot (remote-exec): 169.47.232.XXX             : ok=172  changed=66   unreachable=0    failed=0
-module.icpprovision.null_resource.icp-boot (remote-exec): 169.60.192.XXX             : ok=146  changed=47   unreachable=0    failed=0
-module.icpprovision.null_resource.icp-boot (remote-exec): 169.60.192.XXX             : ok=118  changed=47   unreachable=0    failed=0
-module.icpprovision.null_resource.icp-boot (remote-exec): 169.60.192.XXX             : ok=118  changed=47   unreachable=0    failed=0
-module.icpprovision.null_resource.icp-boot (remote-exec): localhost                  : ok=216  changed=114  unreachable=0    failed=0
-module.icpprovision.null_resource.icp-boot (remote-exec): POST DEPLOY MESSAGE ************************************************************
-module.icpprovision.null_resource.icp-boot (remote-exec): UI URL is https://169.47.232.XXX:8443 , default username/password is admin/admin
-module.icpprovision.null_resource.icp-boot (remote-exec): Playbook run took 0 days, 0 hours, 26 minutes, 13 seconds
+module.icpprovision.null_resource.icp-install (remote-exec): PLAY RECAP *********************************************************************
+module.icpprovision.null_resource.icp-install (remote-exec): 169.62.86.XXX              : ok=99   changed=54   unreachable=0    failed=0
+module.icpprovision.null_resource.icp-install (remote-exec): 169.62.86.XXX              : ok=98   changed=54   unreachable=0    failed=0
+module.icpprovision.null_resource.icp-install (remote-exec): 169.62.86.XXX              : ok=150  changed=91   unreachable=0    failed=0
+module.icpprovision.null_resource.icp-install (remote-exec): 169.62.86.XXX              : ok=98   changed=54   unreachable=0    failed=0
+module.icpprovision.null_resource.icp-install (remote-exec): 169.62.86.XXX              : ok=146  changed=92   unreachable=0    failed=0
+module.icpprovision.null_resource.icp-install (remote-exec): localhost                  : ok=248  changed=155  unreachable=0    failed=0
+
+module.icpprovision.null_resource.icp-install (remote-exec): POST DEPLOY MESSAGE ************************************************************
+
+module.icpprovision.null_resource.icp-install (remote-exec): The Dashboard URL: https://169.62.86.XXX:8443, default username/password is admin/admin
+...
+module.icpprovision.null_resource.icp-install (remote-exec): Playbook run took 0 days, 0 hours, 29 minutes, 35 seconds
+
+module.icpprovision.null_resource.icp-install: Creation complete after 29m39s (ID: 5488852745900281561)
+...
+module.icpprovision.null_resource.icp-worker-scaler (remote-exec): 169.62.86.XXX is still here
+module.icpprovision.null_resource.icp-worker-scaler (remote-exec): 169.62.86.XXX is still here
+module.icpprovision.null_resource.icp-worker-scaler: Creation complete after 3s (ID: 350935943102654483)
+
+Apply complete! Resources: 18 added, 0 changed, 0 destroyed.
 ```
 
 wait a few minutes then check you can access the provided URL from above. If it fails you may just need to wait a while longer for it to come online.

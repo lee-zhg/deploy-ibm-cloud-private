@@ -4,7 +4,7 @@ Instructions:
 
 * [Deploy in local VMs using Vagrant](docs/deploy-vagrant.md)
 * [Deploy in Softlayer VMs using Ansible](docs/deploy-softlayer-ansible.md)
-* [Deploy in Softlayer VMs using Terraform](docs/deploy-softlayer-terraform.md)
+* [Deploy in IBM Cloud VMs using Terraform](docs/deploy-ibmcloud-terraform.md)
 * [Deploy in OpenStack using Terraform](docs/deploy-openstack-terraform.md)
 * [Optional - add NFS dynamic provsioner to your cluster](docs/deploy-nfs-provisioner.md)
 
